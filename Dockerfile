@@ -1,6 +1,9 @@
 FROM node:24-bookworm-slim
 
 ARG DSH_VERSION=0.1.2-rc.1
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
 COPY scripts/patch-remote-settings.sh /usr/local/sbin/patch-remote-settings.sh
 
 RUN apt-get update \

@@ -40,6 +40,16 @@ unset DSH_WEB_PASSWORD DSH_WEB_HASH
 chmod 600 .env
 ```
 
+如果服务器需要通过宿主机上的 HTTP 代理访问 Debian 和 npm，在 `.env` 中加入：
+
+```bash
+HTTP_PROXY=http://127.0.0.1:1082
+HTTPS_PROXY=http://127.0.0.1:1082
+NO_PROXY=localhost,127.0.0.1
+```
+
+Docker 构建使用宿主机网络，因此构建阶段的 `127.0.0.1:1082` 指向服务器上的代理。运行中的 Harness 网络和对外端口不变。
+
 ## 3. 启动并检查
 
 ```bash

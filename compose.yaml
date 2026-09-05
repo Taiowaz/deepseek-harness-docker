@@ -4,8 +4,12 @@ services:
   harness:
     build:
       context: .
+      network: host
       args:
         DSH_VERSION: 0.1.2-rc.1
+        HTTP_PROXY: "${HTTP_PROXY:-}"
+        HTTPS_PROXY: "${HTTPS_PROXY:-}"
+        NO_PROXY: "${NO_PROXY:-}"
     restart: unless-stopped
     init: true
     working_dir: /workspace
