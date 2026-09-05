@@ -1,0 +1,26 @@
+{
+	admin off
+	default_sni {$LAN_IP}
+}
+
+https://{$LAN_IP}:8443 {
+	tls internal
+
+	basic_auth {
+		albin {$BASIC_AUTH_HASH}
+	}
+
+	# Caddy authenticates the LAN caller, then presents the request to Harness
+	# as loopback so its configuration-only API fence permits the admin methods.
+	# Sec-Fetch-Site is intentionally preserved, so cross-site requests remain denied.
+	reverse_proxy 127.0.0.1:3080 {
+		header_up Host 127.0.0.1:3080
+		header_up Origin http://127.0.0.1:3080
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		-Server
+	}
+}

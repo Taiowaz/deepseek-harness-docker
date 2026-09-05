@@ -1,0 +1,5 @@
+.env
+data/
+workspace/
+root.crt
+backups/
