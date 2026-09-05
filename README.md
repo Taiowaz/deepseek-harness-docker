@@ -127,7 +127,7 @@ docker compose up -d
 ./update-harness.sh 0.1.2-rc.1
 ```
 
-备份默认保存在 `backups/`，脚本不会删除 `data/` 或 `workspace/`。当前运行版本也可以这样查看：
+备份默认保存在 `backups/`，脚本不会删除 `data/` 或 `workspace/`。镜像构建时会自动应用远程模型设置补丁，使内网认证用户可以使用 Settings → Models。当前运行版本也可以这样查看：
 
 ```bash
 docker compose exec harness \

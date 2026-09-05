@@ -1,6 +1,7 @@
 FROM node:24-bookworm-slim
 
 ARG DSH_VERSION=0.1.2-rc.1
+COPY scripts/patch-remote-settings.sh /usr/local/sbin/patch-remote-settings.sh
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -13,6 +14,7 @@ RUN apt-get update \
         python3 \
         ripgrep \
     && npm install --global --omit=dev "@deepseek-ai/dsh@${DSH_VERSION}" \
+    && /usr/local/sbin/patch-remote-settings.sh \
     && npm cache clean --force \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /data/home /data/cache/npm /workspace \
