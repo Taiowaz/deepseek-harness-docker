@@ -12,9 +12,10 @@ for required_text in \
     'data-workspace-config.tgz' \
     'docker compose -f "$COMPOSE_FILE" config --quiet' \
     'docker compose -f "$COMPOSE_FILE" build harness' \
+    '--force' \
     'wait_for_healthy' \
     'package.json'; do
-    if ! grep -Fq "$required_text" "$script"; then
+    if ! grep -Fq -- "$required_text" "$script"; then
         printf 'missing required script behavior: %s\n' "$required_text" >&2
         exit 1
     fi

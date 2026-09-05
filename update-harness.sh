@@ -13,15 +13,17 @@ backup_dir=""
 
 usage() {
     cat <<EOF
-Usage: $SCRIPT_NAME [VERSION]
+Usage: $SCRIPT_NAME [--force] [VERSION]
 
 Update $PACKAGE_NAME to npm's latest version and redeploy the harness.
 
 With VERSION, update to an exact npm version instead of the latest tag.
+Use --force to rebuild and redeploy even when the configured version is unchanged.
 Examples:
   $SCRIPT_NAME
   $SCRIPT_NAME 0.1.2-rc.1
 
+  $SCRIPT_NAME --force 0.1.2-rc.1
 Set BACKUP_DIR to place the private data backup elsewhere.
 EOF
 }
@@ -98,17 +100,33 @@ wait_for_healthy() {
     printf 'Timed out waiting for Harness healthcheck.\n' >&2
     return 1
 }
+force_rebuild=0
+requested_version=""
+while (( $# > 0 )); do
+    case "$1" in
+        --force)
+            force_rebuild=1
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -*)
+            usage >&2
+            exit 2
+            ;;
+        *)
+            [[ -z "$requested_version" ]] || { usage >&2; exit 2; }
+            requested_version="$1"
+            ;;
+    esac
+    shift
+done
 
-[[ $# -le 1 ]] || { usage >&2; exit 2; }
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-    usage
-    exit 0
-fi
-
-requested_version="${1:-}"
 if [[ -n "$requested_version" ]] && ! version_is_valid "$requested_version"; then
     fail "invalid version: $requested_version"
 fi
+
 
 [[ -f "$COMPOSE_FILE" ]] || fail "missing $COMPOSE_FILE"
 [[ -f "$DOCKERFILE" ]] || fail "missing $DOCKERFILE"
@@ -136,9 +154,12 @@ fi
 
 printf 'Current Harness version: %s\n' "$current_compose_version"
 printf 'Target Harness version:  %s\n' "$target_version"
-if [[ "$current_compose_version" == "$target_version" ]]; then
-    printf 'Harness is already up to date.\n'
+if [[ "$current_compose_version" == "$target_version" && "$force_rebuild" -eq 0 ]]; then
+    printf 'Harness is already up to date. Use --force to rebuild the current version.\n'
     exit 0
+fi
+if [[ "$current_compose_version" == "$target_version" ]]; then
+    printf 'Rebuilding current Harness version because --force was supplied.\n'
 fi
 
 [[ -d "$REPO_DIR/data" ]] || fail "missing data directory"
